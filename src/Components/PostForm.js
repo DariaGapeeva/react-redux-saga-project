@@ -1,6 +1,10 @@
 import React from "react";
+import { connect } from "react-redux";
+import { appShowAlert } from "../redux/appReduser";
+import Alert from "./Alert";
+import { postsCreatePost } from "./../redux/postsReduser";
 
-export default class PostForm extends React.Component {
+class PostForm extends React.Component {
   constructor(props) {
     super(props);
 
@@ -12,12 +16,16 @@ export default class PostForm extends React.Component {
   submitHandler = (event) => {
     event.preventDefault();
     const { title } = this.state;
+    if (!title.trim()) {
+      return this.props.appShowAlert("Поле обязательно к заполнению");
+    }
 
     const newPost = {
       title,
       id: Date.now().toString(),
     };
     console.log(newPost);
+    this.props.postsCreatePost(newPost);
     this.setState({
       title: "",
     });
@@ -35,6 +43,7 @@ export default class PostForm extends React.Component {
   render() {
     return (
       <form onSubmit={this.submitHandler}>
+        {this.props.alert && <Alert alertMessage={this.props.alert} />}
         <div className="form-group">
           <label htmlFor="title">Заголовок поста</label>
           <input
@@ -53,3 +62,11 @@ export default class PostForm extends React.Component {
     );
   }
 }
+
+const mapStateToProps = (state) => ({
+  alert: state.app.alert,
+});
+
+export default connect(mapStateToProps, { postsCreatePost, appShowAlert })(
+  PostForm
+);
